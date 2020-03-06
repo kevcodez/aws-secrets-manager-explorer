@@ -1,24 +1,9 @@
-# electron-vue-2
+# AWS Secrets Manager Explorer
 
-## Project setup
-```
-yarn install
-```
+GUI to quickly navigate and copy secrets from AWS Secrets Manager.
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+*WORK IN PROGRESS*
 
-### Compiles and minifies for production
-```
-yarn build
-```
+![Overview](/screenshots/overview.png?raw=true)
 
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+![Secret Info](/screenshots/secret.png?raw=true)

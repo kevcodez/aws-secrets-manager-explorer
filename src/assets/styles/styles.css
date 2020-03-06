@@ -1,0 +1,27 @@
+
+@font-face {
+    font-family: 'Jetbrains Mono';
+    src: url('../fonts/woff2/JetBrainsMono-Regular.woff2');
+}
+
+@font-face {
+    font-family: 'Jetbrains Mono';
+    src: url('../fonts/woff2/JetBrainsMono-Bold.woff2');
+    font-weight: bold;
+}
+
+@font-face {
+    font-family: 'Jetbrains Mono';
+    src: url('../fonts/woff2/JetBrainsMono-Medium.woff2');
+    font-weight: 500;
+}
+
+body {
+    font-family: 'Jetbrains Mono';
+}
+
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
