@@ -1,50 +1,19 @@
 "use strict";
 
 import { app, protocol, BrowserWindow, Menu } from "electron";
+import { autoUpdater } from "electron-updater";
 import {
   createProtocol
   /* installVueDevtools */
 } from "vue-cli-plugin-electron-builder/lib";
 const isDevelopment = process.env.NODE_ENV !== "production";
+const join = require("path").join;
 
-
-const template = [
-  // { role: 'appMenu' }
-  {
-    label: app.name,
-    submenu: [
-      { role: 'about' },
-      { label: 'Check for Updates...' },
-      { label: 'Settings' },
-      { type: 'separator' },
-      { role: 'quit' }
-    ]
-  },
-  {
-    role: 'help',
-    submenu: [
-      {
-        label: 'Github Repo',
-        click: async () => {
-          const { shell } = require('electron')
-          await shell.openExternal('https://electronjs.org')
-        }
-      },
-
-      {
-        label: 'Github Issues',
-        click: async () => {
-          const { shell } = require('electron')
-          await shell.openExternal('https://electronjs.org')
-        }
-      }
-    ]
-  }
-]
-
-// @ts-ignore
-const menu = Menu.buildFromTemplate(template)
-Menu.setApplicationMenu(menu)
+autoUpdater.setFeedURL({
+  provider: "github",
+  repo: "aws-secrets-manager-explorer",
+  owner: "kevcodez"
+});
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -60,6 +29,7 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1200,
     height: 800,
+    title: "AWS Secrets Manager Explorer",
     webPreferences: {
       nodeIntegration: true
     }
@@ -73,6 +43,7 @@ function createWindow() {
     createProtocol("app");
     // Load the index.html when not in development
     win.loadURL("app://./index.html");
+    autoUpdater.checkForUpdates();
   }
 
   win.on("closed", () => {
@@ -126,3 +97,78 @@ if (isDevelopment) {
     });
   }
 }
+
+const template = [
+  // { role: 'appMenu' }
+  {
+    label: app.name,
+    submenu: [
+      {
+        label: "About",
+        click: () => {
+          const aboutTab = new BrowserWindow({
+            parent: win,
+            title: "About",
+            autoHideMenuBar: true,
+            modal: true,
+            show: true,
+            width: 400,
+            height: 400,
+            maximizable: false,
+            minimizable: false,
+            webPreferences: {
+              nodeIntegration: true
+            }
+          });
+
+          if (process.env.WEBPACK_DEV_SERVER_URL) {
+            if (!process.env.IS_TEST) aboutTab.webContents.openDevTools();
+            aboutTab.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "#about");
+          } else {
+            aboutTab.loadURL("app://./index.html#about");
+          }
+
+          aboutTab.once("ready-to-show", () => {
+            aboutTab.show();
+          });
+        }
+      },
+      {
+        label: "Check for Updates...",
+        click: () => {
+          autoUpdater.checkForUpdates();
+        }
+      },
+      { type: "separator" },
+      { role: "quit" }
+    ]
+  },
+  {
+    role: "help",
+    submenu: [
+      {
+        label: "Github Repo",
+        click: async () => {
+          const { shell } = require("electron");
+          await shell.openExternal(
+            "https://github.com/kevcodez/aws-secrets-manager-explorer"
+          );
+        }
+      },
+
+      {
+        label: "Github Issues",
+        click: async () => {
+          const { shell } = require("electron");
+          await shell.openExternal(
+            "https://github.com/kevcodez/aws-secrets-manager-explorer/issues"
+          );
+        }
+      }
+    ]
+  }
+];
+
+// @ts-ignore
+const menu = Menu.buildFromTemplate(template);
+Menu.setApplicationMenu(menu);

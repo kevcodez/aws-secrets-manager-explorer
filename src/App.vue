@@ -1,20 +1,20 @@
 <template>
   <div id="app">
-    <ActiveProfile />
-
-    <router-view />
+    <component :is="layout">
+      <router-view />
+    </component>
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import "./assets/styles/styles.css";
-import ActiveProfile from "@/components/ActiveProfile.vue";
 
-@Component({
-  components: {
-    ActiveProfile
+@Component({})
+export default class App extends Vue {
+  get layout() {
+    // @ts-ignore
+    return (this.$route.meta.layout || "default") + "-layout";
   }
-})
-export default class App extends Vue {}
+}
 </script>

@@ -3,10 +3,12 @@ import VueRouter from "vue-router";
 import SecretsList from "../views/SecretsList.vue";
 import Secret from "../views/Secret.vue";
 import Profiles from "../views/Profiles.vue";
+import About from "../views/About.vue";
 
 Vue.use(VueRouter);
 
-const routes = [{
+const routes = [
+  {
     path: "/",
     name: "SecretsList",
     component: SecretsList
@@ -20,10 +22,19 @@ const routes = [{
     path: "/secret/:arn",
     name: "Secret",
     component: Secret
+  },
+  {
+    path: "/about",
+    name: "About",
+    component: About,
+    meta: {
+      layout: "empty"
+    }
   }
 ];
 
 const router = new VueRouter({
+  mode: "hash",
   routes
 });
 
