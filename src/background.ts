@@ -112,10 +112,11 @@ const template = [
             autoHideMenuBar: true,
             modal: true,
             show: true,
-            width: 400,
-            height: 400,
+            width: 350,
+            height: 300,
             maximizable: false,
             minimizable: false,
+            resizable: false,
             webPreferences: {
               nodeIntegration: true
             }

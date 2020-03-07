@@ -1,6 +1,8 @@
 <template>
   <div class="m-4">
-    <table class="w-full">
+    <span class="mb-4 font-bold">AWS Secrets Manager Explorer</span>
+
+    <table class="w-full mt-6">
       <tbody class="w-full">
         <tr>
           <td>Application</td>
@@ -21,16 +23,16 @@
       </tbody>
     </table>
 
-    <p class="mt-4">
-      Found a bug? Open an
+    <p class="mt-6">
+      Found a bug?
       <a
-        class="text-blue-400"
+        class="cursor-pointer text-blue-400"
         @click="
           openLink(
             'https://github.com/kevcodez/aws-secrets-manager-explorer/issues'
           )
         "
-        >Issue</a
+        >Open an Issue</a
       >
     </p>
   </div>
