@@ -9,6 +9,9 @@ module.exports = {
         mac: {
           category: "public.app-category.developer-tools",
           target: ["zip", "dmg"]
+        },
+        linux: {
+          target: "AppImage"
         }
       }
     }

@@ -1,7 +1,9 @@
+if: tag IS present
+
 matrix:
     include:
       - os: osx
-        osx_image: xcode10.1
+        osx_image: xcode11.3
         language: node_js
         node_js: "12"
         env:
@@ -13,8 +15,7 @@ matrix:
   
 cache:
   directories:
-    - elm-stuff/build-artifacts
-    - elm-stuff/packages
+    - $HOME/.cache/yarn
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
 
