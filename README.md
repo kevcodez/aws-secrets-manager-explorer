@@ -9,6 +9,13 @@ GUI to quickly navigate and copy secrets from AWS Secrets Manager.
 
 *WORK IN PROGRESS*
 
-![Overview](/screenshots/overview.png?raw=true)
+Profiles page
 
-![Secret Info](/screenshots/secret.png?raw=true)
+![Multiple profiles](/screenshots/ProfilesView.png?raw=true)
+
+Secret List
+![Secret List](/screenshots/SecretListView.png?raw=true)
+
+Secret Info
+
+![Secret Info](/screenshots/SecretView.png?raw=true)

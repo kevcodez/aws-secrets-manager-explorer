@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="h-full">
     <div class="float-right">
       <ActiveProfile class="inline-block mr-4" />
       <router-link

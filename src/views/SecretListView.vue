@@ -54,7 +54,7 @@
           <th class="w-1/12 py-3 border-b border-gray-200">
             <font-awesome-icon
               icon="sync-alt"
-              class="text-xl float-right mr-6 cursor-pointer hover:text-indigo-500"
+              class="text-xl float-right mr-3 cursor-pointer hover:text-indigo-500"
               v-if="activeProfile"
               @click="loadSecrets(true)"
             />

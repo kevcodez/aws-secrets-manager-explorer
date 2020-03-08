@@ -10,68 +10,64 @@
       </ol>
     </nav>
 
-    <ValidationObserver v-slot="{ passes }">
-      <form method="post" @submit.prevent="passes(save)">
-        <div class="flex h-screen">
-          <div class="w-1/4 pr-4">
-            <div
-              class="shadow-md bg-gray-300 p-2 font-medium rounded-r tracking-wider uppercase"
+    <div class="flex">
+      <div class="w-2/5 pr-3 text-center pt-2">
+        <a
+          class="bg-indigo-500 text-white py-1 rounded hover:bg-indigo-800 cursor-pointer px-4 py-2 mb-5"
+          @click="initNewProfile()"
+          >Add new profile
+        </a>
+
+        <div class="mt-4 text-left">
+          <div
+            v-for="profile in profiles"
+            :key="profile.id"
+            class="hover:bg-gray-200 py-2 px-4 cursor-pointer"
+            :class="{
+              'font-bold text-indigo-700':
+                selectedProfile && selectedProfile.id === profile.id
+            }"
+            @click="selectProfile(profile)"
+          >
+            {{ profile.label }}
+            <span
+              v-if="activeProfile && activeProfile.id === profile.id"
+              class="font-bold text-sm"
+              >&nbsp;(Active)</span
             >
-              <span>Profiles</span>
-              <font-awesome-icon
-                class="float-right cursor-pointer"
-                icon="plus"
-              />
-              <div class="clearfix" />
-            </div>
-            <div class="shadow-md bg-gray-100 h-full">
-              <div
-                v-for="profile in profiles"
-                :key="profile.id"
-                class="hover:bg-gray-200 p-2 cursor-pointer"
-                :class="{
-                  'font-bold text-indigo-700':
-                    selectedProfile && selectedProfile.id === profile.id
-                }"
-                @click="selectProfile(profile)"
-              >
-                {{ profile.label }}
-                <span
-                  v-if="activeProfile && activeProfile.id === profile.id"
-                  class="font-bold text-sm"
-                  >&nbsp;(Active)</span
-                >
-              </div>
-            </div>
           </div>
-          <div class="w-3/4">
-            <div class="w-full pr-4 pl-2">
-              <div
-                class="flex items-center rounded bg-indigo-500 text-white text-sm px-4 py-3 mb-4"
-                role="alert"
-              >
-                <svg
-                  class="fill-current w-4 h-4 mr-2"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    d="M12.432 0c1.34 0 2.01.912 2.01 1.957 0 1.305-1.164 2.512-2.679 2.512-1.269 0-2.009-.75-1.974-1.99C9.789 1.436 10.67 0 12.432 0zM8.309 20c-1.058 0-1.833-.652-1.093-3.524l1.214-5.092c.211-.814.246-1.141 0-1.141-.317 0-1.689.562-2.502 1.117l-.528-.88c2.572-2.186 5.531-3.467 6.801-3.467 1.057 0 1.233 1.273.705 3.23l-1.391 5.352c-.246.945-.141 1.271.106 1.271.317 0 1.357-.392 2.379-1.207l.6.814C12.098 19.02 9.365 20 8.309 20z"
-                  />
-                </svg>
-                <p>
-                  The data will only be saved
-                  <strong>locally.</strong>
-                </p>
-              </div>
+        </div>
+      </div>
+      <div class="w-3/5">
+        <div class="w-full pr-4 pl-2">
+          <div
+            class="flex items-center rounded bg-blue-500 text-white text-sm px-4 py-3 mb-4"
+            role="alert"
+          >
+            <svg
+              class="fill-current w-4 h-4 mr-2"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+            >
+              <path
+                d="M12.432 0c1.34 0 2.01.912 2.01 1.957 0 1.305-1.164 2.512-2.679 2.512-1.269 0-2.009-.75-1.974-1.99C9.789 1.436 10.67 0 12.432 0zM8.309 20c-1.058 0-1.833-.652-1.093-3.524l1.214-5.092c.211-.814.246-1.141 0-1.141-.317 0-1.689.562-2.502 1.117l-.528-.88c2.572-2.186 5.531-3.467 6.801-3.467 1.057 0 1.233 1.273.705 3.23l-1.391 5.352c-.246.945-.141 1.271.106 1.271.317 0 1.357-.392 2.379-1.207l.6.814C12.098 19.02 9.365 20 8.309 20z"
+              />
+            </svg>
+            <p>
+              The data will only be saved
+              <strong>locally.</strong>
+            </p>
+          </div>
 
-              <div class="text-xl font-medium mb-2">
-                <span v-if="selectedProfile"
-                  >Editing profile {{ selectedProfile.label }}</span
-                >
-                <span v-else>Adding new profile</span>
-              </div>
+          <div class="text-lg font-bold mb-2">
+            <span v-if="selectedProfile"
+              >Editing profile {{ selectedProfile.label }}</span
+            >
+            <span v-else>Adding new profile</span>
+          </div>
 
+          <ValidationObserver v-slot="{ passes }">
+            <form method="post" @submit.prevent="passes(save)">
               <div class="flex flex-wrap h-full">
                 <div class="w-full">
                   <label
@@ -178,11 +174,11 @@
               >
                 Save
               </button>
-            </div>
-          </div>
+            </form>
+          </ValidationObserver>
         </div>
-      </form>
-    </ValidationObserver>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -223,17 +219,23 @@ export default class ProfilesView extends Vue {
     ]);
   }
 
-  deleteProfile() {
-    profilesService.deleteProfile(this.selectedProfile!!);
-    this.profiles = profilesService.getProfiles();
-    this.activeProfile = profilesService.getActiveProfile();
+  initNewProfile() {
+    this.resetData();
+  }
 
+  resetData() {
     this.selectedProfile = null;
     this.label = "";
     this.region = "";
     this.accessKeySecret = "";
     this.accessKeyId = "";
     this.assumeRoleArn = "";
+  }
+
+  deleteProfile() {
+    profilesService.deleteProfile(this.selectedProfile!!);
+    this.profiles = profilesService.getProfiles();
+    this.activeProfile = profilesService.getActiveProfile();
   }
 
   save() {
