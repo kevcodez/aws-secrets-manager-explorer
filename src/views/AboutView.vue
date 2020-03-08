@@ -44,7 +44,7 @@ const app = require("electron").remote.app;
 const { shell } = require("electron");
 
 @Component({})
-export default class About extends Vue {
+export default class AboutView extends Vue {
   get appVersion() {
     return app.getVersion();
   }

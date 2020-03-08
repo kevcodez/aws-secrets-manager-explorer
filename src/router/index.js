@@ -1,32 +1,35 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import SecretsList from "../views/SecretsList.vue";
-import Secret from "../views/Secret.vue";
-import Profiles from "../views/Profiles.vue";
-import About from "../views/About.vue";
+import SecretListView from "@/views/SecretListView.vue";
+import SecretView from "@/views/SecretView.vue";
+import ProfilesView from "@/views/ProfilesView.vue";
+import AboutView from "@/views/AboutView.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "SecretsList",
-    component: SecretsList
+    name: "SecretListView",
+    component: SecretListView
   },
   {
     path: "/profiles",
-    name: "Profiles",
-    component: Profiles
+    name: "ProfilesView",
+    component: ProfilesView,
+    meta: {
+      layout: "empty"
+    }
   },
   {
     path: "/secret/:arn",
-    name: "Secret",
-    component: Secret
+    name: "SecretView",
+    component: SecretView
   },
   {
     path: "/about",
-    name: "About",
-    component: About,
+    name: "AboutView",
+    component: AboutView,
     meta: {
       layout: "empty"
     }

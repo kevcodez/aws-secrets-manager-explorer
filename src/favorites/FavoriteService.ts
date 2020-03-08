@@ -1,31 +1,41 @@
 import store from "@/store";
 
+const SETTINGS_KEY_FAVORITES = "favorites";
+
 class FavoriteService {
+  favorites: string[] = [];
+
+  constructor() {
+    this.favorites = this.loadFavorites();
+  }
+
   markAsFavorite(secret: string) {
     const favorites = this.getFavorites();
     favorites.push(secret);
 
-    this.saveFavorites(favorites);
+    this.saveFavorites();
   }
 
   removeFromFavorites(secret: string) {
-    const favorites = this.getFavorites().filter(it => it !== secret);
+    this.favorites = this.favorites.filter(it => it !== secret);
 
-    this.saveFavorites(favorites);
-  }
-
-  saveFavorites(favorites: string[]) {
-    store.set("favorites", favorites);
+    this.saveFavorites();
   }
 
   getFavorites(): string[] {
-    return (store.get("favorites") as string[]) ?? [];
+    return this.favorites;
   }
 
   isFavorite(secretName: string): boolean {
-    const favorites = this.getFavorites();
+    return this.favorites.includes(secretName);
+  }
 
-    return favorites.includes(secretName);
+  private saveFavorites() {
+    store.set(SETTINGS_KEY_FAVORITES, this.favorites);
+  }
+
+  private loadFavorites(): string[] {
+    return (store.get(SETTINGS_KEY_FAVORITES) as string[]) ?? [];
   }
 }
 

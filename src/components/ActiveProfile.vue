@@ -1,6 +1,6 @@
 <template>
-  <div class="mx-5">
-    <div class="dropdown inline-block relative float-right select-none">
+  <div>
+    <div class="dropdown inline-block relative select-none">
       <button
         class="bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center"
       >
@@ -15,27 +15,19 @@
           />
         </svg>
       </button>
-      <ul class="dropdown-menu absolute hidden text-gray-700 pt-1">
+      <ul
+        class="dropdown-menu absolute hidden text-gray-700 pt-1"
+        v-if="activeProfile"
+      >
         <li
-          class
           v-for="profile in profiles"
+          :disabled="profile.label === activeProfile.label"
           :key="profile.label"
-          v-if="!activeProfile || profile.label !== activeProfile.label"
         >
           <a
-            class="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+            class="bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
             @click="selectProfile(profile)"
             >{{ profile.label }}</a
-          >
-        </li>
-        <li class="py-2 bg-gray-200">
-          <div class="w-full border-b-2 border-gray-300"></div>
-        </li>
-        <li>
-          <router-link
-            class="font-bold rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
-            to="/profiles"
-            >Manage Profiles</router-link
           >
         </li>
       </ul>
@@ -45,8 +37,11 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { profilesService } from "@/profiles/ProfilesService";
-import { Profile } from "../profiles/Profile";
+import {
+  profilesService,
+  SETTINGS_KEY_PROFILES
+} from "@/profiles/ProfilesService";
+import { Profile } from "@/profiles/Profile";
 import store from "@/store";
 
 @Component({})
@@ -57,8 +52,8 @@ export default class ActiveProfile extends Vue {
 
   mounted() {
     this.unsubribeWatcher = store.onDidChange(
-      "profiles",
-      (newValue, oldValue) => {
+      SETTINGS_KEY_PROFILES,
+      (newValue, _oldValue) => {
         this.profiles = newValue;
       }
     );

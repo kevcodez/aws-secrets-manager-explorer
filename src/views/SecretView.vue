@@ -134,7 +134,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { getSecretsManager } from "../aws-helper";
+import { secretService } from "@/SecretService";
 const { clipboard } = require("electron");
 import store from "@/store";
 import { favoriteService } from "@/favorites/FavoriteService";
@@ -143,9 +143,10 @@ import {
   GetSecretValueResponse
 } from "aws-sdk/clients/secretsmanager";
 import { AWSError } from "aws-sdk";
+import { SETTINGS_KEY_ACTIVE_PROFILE } from "../profiles/ProfilesService";
 
 @Component({})
-export default class SecretsList extends Vue {
+export default class SecretView extends Vue {
   describeSecretResult: DescribeSecretResponse | null = null;
   secretValueResult: GetSecretValueResponse | null = null;
   jsonSecret: Record<string, any> | null = null;
@@ -164,37 +165,26 @@ export default class SecretsList extends Vue {
   }
 
   async loadSecret(arn: string) {
-    const secretsManager = await getSecretsManager();
-    if (!secretsManager) {
-      return;
-    }
-
     this.error = null;
     this.loadingSecret = true;
 
     try {
-      const describeSecretResult = await secretsManager
-        .describeSecret({
-          SecretId: arn
-        })
-        .promise();
+      const describeSecretResult = await secretService.describeSecret(arn);
 
-      const secretValueResult = await secretsManager
-        .getSecretValue({
-          SecretId: arn
-        })
-        .promise();
+      const secretValueResult = await secretService.getSecretValue(arn);
 
-      if (describeSecretResult.Name) {
+      if (describeSecretResult?.Name) {
         this.favorite = favoriteService.isFavorite(describeSecretResult.Name);
       }
 
-      const secretString = secretValueResult.SecretString as string;
+      if (secretValueResult && secretValueResult.SecretString) {
+        const secretString = secretValueResult.SecretString as string;
 
-      try {
-        this.jsonSecret = JSON.parse(secretString);
-      } catch (err) {
-        this.jsonSecret = null;
+        try {
+          this.jsonSecret = JSON.parse(secretString);
+        } catch (err) {
+          this.jsonSecret = null;
+        }
       }
 
       this.secretValueResult = secretValueResult;
@@ -226,31 +216,27 @@ export default class SecretsList extends Vue {
 
     this.loadSecret(arn);
 
-    this.unsubribeWatcher = store.onDidChange("activeProfile", async () => {
-      this.loadingSecret = true;
+    this.unsubribeWatcher = store.onDidChange(
+      SETTINGS_KEY_ACTIVE_PROFILE,
+      async () => {
+        this.loadingSecret = true;
 
-      // ARN will change, so we need to find the new ARN
-      const secretsManager = await getSecretsManager();
-      const secretsResponse = await secretsManager
-        ?.listSecrets({
-          MaxResults: 100
-        })
-        .promise();
+        // ARN will change, so we need to find the new ARN
+        const allSecrets = await secretService.getAllSecrets();
 
-      const matchingSecrets =
-        secretsResponse?.SecretList?.filter(
-          it => it.Name === this.secretValueResult?.Name
-        ) ?? [];
+        const matchingSecrets =
+          allSecrets.filter(it => it.Name === this.secretValueResult?.Name) ??
+          [];
 
-      if (matchingSecrets.length) {
-        const arn = matchingSecrets[0]!!.ARN!!;
+        if (matchingSecrets.length) {
+          const arn = matchingSecrets[0]!!.ARN!!;
 
-        this.loadSecret(arn);
-      } else {
-        // @ts-ignore
-        // self.$router.push('/')
+          this.loadSecret(arn);
+        } else {
+          this.$router.push("/");
+        }
       }
-    });
+    );
   }
 
   beforeDestroy() {

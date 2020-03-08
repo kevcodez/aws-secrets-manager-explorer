@@ -50,7 +50,7 @@
             <font-awesome-icon
               icon="sync-alt"
               class="text-xl float-right mr-2 cursor-pointer"
-              @click="loadSecrets()"
+              @click="loadSecrets(true)"
             />
           </th>
         </tr>
@@ -87,18 +87,20 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-// eslint-disable-next-line no-unused-vars
 import { SecretListEntry } from "aws-sdk/clients/secretsmanager";
-import { getSecretsManager } from "../aws-helper";
+import { secretService } from "@/SecretService";
 import store from "@/store";
 import { favoriteService } from "@/favorites/FavoriteService";
+import { AWSError } from "aws-sdk";
+import { SETTINGS_KEY_ACTIVE_PROFILE } from "@/profiles/ProfilesService";
 
 @Component({})
-export default class SecretsList extends Vue {
+export default class SecretListView extends Vue {
   secrets: SecretListEntry[] = [];
   filteredSecrets: SecretListEntry[] = [];
   searchTerm = "";
   loading = false;
+  error: AWSError | null = null;
   unsubribeWatcher: any = null;
 
   isFavorite(secret: SecretListEntry): boolean {
@@ -108,36 +110,32 @@ export default class SecretsList extends Vue {
   mounted() {
     this.loadSecrets();
 
-    this.unsubribeWatcher = store.onDidChange("activeProfile", () => {
-      console.log("did change in list");
-      this.loadSecrets();
-    });
+    this.unsubribeWatcher = store.onDidChange(
+      SETTINGS_KEY_ACTIVE_PROFILE,
+      () => {
+        this.loadSecrets();
+      }
+    );
   }
 
   beforeDestroy() {
     this.unsubribeWatcher();
   }
 
-  async loadSecrets() {
+  async loadSecrets(forceRefresh = false) {
     if (this.loading) return;
 
-    const secretsManager = await getSecretsManager();
-    if (!secretsManager) {
-      return;
+    this.loading = true;
+    this.error = null;
+
+    try {
+      this.secrets = await secretService.getAllSecrets(forceRefresh);
+      this.filterSecrets();
+    } catch (err) {
+      this.error = err;
     }
 
-    this.loading = true;
-
-    const result = await secretsManager
-      .listSecrets({
-        MaxResults: 100
-      })
-      .promise();
-
     this.loading = false;
-
-    this.secrets = result.SecretList!!;
-    this.filterSecrets();
   }
 
   filterSecrets() {
@@ -166,7 +164,6 @@ export default class SecretsList extends Vue {
   }
 
   selectSecret(secret) {
-    // @ts-ignore
     this.$router.push(`/secret/${encodeURIComponent(secret.ARN)}`);
   }
 }

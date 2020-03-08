@@ -9,7 +9,8 @@ import {
   faSyncAlt,
   faPlus,
   faTrash,
-  faStar
+  faStar,
+  faCog
 } from "@fortawesome/free-solid-svg-icons";
 import { faStar as starRegular } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -28,7 +29,8 @@ library.add(
   starRegular,
   faPlus,
   faTrash,
-  faSyncAlt
+  faSyncAlt,
+  faCog
 );
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);

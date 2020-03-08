@@ -3,7 +3,9 @@
     <nav class="container">
       <ol class="list-reset py-4 rounded flex bg-grey-light text-grey">
         <li class="px-2">
-          <router-link to="/" class="no-underline text-indigo">&lt; Back to all secrets</router-link>
+          <router-link to="/" class="no-underline text-indigo"
+            >&lt; Back to all secrets</router-link
+          >
         </li>
       </ol>
     </nav>
@@ -12,9 +14,14 @@
       <form method="post" @submit.prevent="passes(save)">
         <div class="flex h-screen">
           <div class="w-1/4 pr-4">
-            <div class="shadow-md bg-gray-300 p-2 font-medium rounded-r tracking-wider uppercase">
+            <div
+              class="shadow-md bg-gray-300 p-2 font-medium rounded-r tracking-wider uppercase"
+            >
               <span>Profiles</span>
-              <font-awesome-icon class="float-right" icon="plus" />
+              <font-awesome-icon
+                class="float-right cursor-pointer"
+                icon="plus"
+              />
               <div class="clearfix" />
             </div>
             <div class="shadow-md bg-gray-100 h-full">
@@ -22,9 +29,14 @@
                 v-for="profile in profiles"
                 :key="profile.label"
                 class="hover:bg-gray-200 p-2 cursor-pointer"
-                :class="{'font-bold text-purple-700': selectedProfile && selectedProfile.label === profile.label}"
+                :class="{
+                  'font-bold text-purple-700':
+                    selectedProfile && selectedProfile.label === profile.label
+                }"
                 @click="selectProfile(profile)"
-              >{{ profile.label }}</div>
+              >
+                {{ profile.label }}
+              </div>
             </div>
           </div>
           <div class="w-3/4">
@@ -53,7 +65,8 @@
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs text-left font-bold mb-2"
                     for="Label"
-                  >Label</label>
+                    >Label</label
+                  >
                   <ValidationProvider rules="required" v-slot="{ errors }">
                     <input
                       v-model="label"
@@ -71,7 +84,8 @@
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs text-left font-bold mb-2"
                     for="region"
-                  >Region</label>
+                    >Region</label
+                  >
                   <ValidationProvider rules="required" v-slot="{ errors }">
                     <input
                       v-model="region"
@@ -89,7 +103,8 @@
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs text-left font-bold mb-2"
                     for="awsAccessKeyId"
-                  >AWS Access Key ID</label>
+                    >AWS Access Key ID</label
+                  >
                   <ValidationProvider rules="required" v-slot="{ errors }">
                     <input
                       v-model="accessKeyId"
@@ -106,7 +121,8 @@
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs text-left font-bold mb-2"
                     for="awsAccessKeySecret"
-                  >AWS Access Key Secret</label>
+                    >AWS Access Key Secret</label
+                  >
                   <ValidationProvider rules="required" v-slot="{ errors }">
                     <input
                       v-model="accessKeySecret"
@@ -123,7 +139,8 @@
                   <label
                     class="block uppercase tracking-wide text-gray-700 text-xs text-left font-bold mb-2"
                     for="assumeRoleArn"
-                  >AWS Assume Role ARN (optional)</label>
+                    >AWS Assume Role ARN (optional)</label
+                  >
                   <input
                     v-model="assumeRoleArn"
                     class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
@@ -146,7 +163,9 @@
               <button
                 type="submit"
                 class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded self-end align-middle float-right"
-              >Save</button>
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>
@@ -158,7 +177,6 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import { Profile } from "@/profiles/Profile";
-import store from "@/store";
 import { profilesService } from "@/profiles/ProfilesService";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 import { required } from "vee-validate/dist/rules";
@@ -170,12 +188,12 @@ import { extend } from "vee-validate";
     ValidationObserver
   }
 })
-export default class Profiles extends Vue {
-  label: string = "";
-  region: string = "";
-  accessKeySecret: string = "";
-  accessKeyId: string = "";
-  assumeRoleArn: string = "";
+export default class ProfilesView extends Vue {
+  label = "";
+  region = "";
+  accessKeySecret = "";
+  accessKeyId = "";
+  assumeRoleArn = "";
 
   profiles: Profile[] = [];
   selectedProfile: Profile | null = null;
