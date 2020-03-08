@@ -5,9 +5,11 @@ import {
   GetSecretValueResponse,
   SecretListEntry
 } from "aws-sdk/clients/secretsmanager";
+import { Profile } from "./profiles/Profile";
 
 class SecretService {
   secrets = new Map<string, SecretListEntry[]>();
+  assumeRoleCredentials = new Map<string, AWS.Credentials>();
 
   private async getSecretsManager(): Promise<SecretsManager | null> {
     const activeProfile = profilesService.getActiveProfile();
@@ -15,31 +17,10 @@ class SecretService {
       return null;
     }
 
-    let credentials;
-
-    let sessionToken;
+    let credentials: AWS.Credentials | null;
 
     if (activeProfile.assumeRoleArn) {
-      const sts = new AWS.STS({
-        accessKeyId: activeProfile.accessKeyId,
-        secretAccessKey: activeProfile.accessKeySecret,
-        region: activeProfile.region
-      });
-
-      const response = await sts
-        .assumeRole({
-          RoleArn: activeProfile.assumeRoleArn,
-          RoleSessionName: "GetSecrets"
-        })
-        .promise();
-
-      if (response.Credentials) {
-        credentials = new AWS.Credentials({
-          accessKeyId: response.Credentials.AccessKeyId!!,
-          secretAccessKey: response.Credentials.SecretAccessKey!!,
-          sessionToken: response.Credentials?.SessionToken
-        });
-      }
+      credentials = await this.getCredentialsWithAssumeRole(activeProfile);
     } else {
       credentials = new AWS.Credentials({
         accessKeyId: activeProfile.accessKeyId,
@@ -47,12 +28,58 @@ class SecretService {
       });
     }
 
+    if (!credentials) {
+      return null;
+    }
+
     AWS.config.credentials = credentials;
 
     return new AWS.SecretsManager({
       region: activeProfile.region,
-      sessionToken: sessionToken
+      sessionToken: credentials.sessionToken
     });
+  }
+
+  private async getCredentialsWithAssumeRole(
+    profile: Profile
+  ): Promise<AWS.Credentials | null> {
+    if (this.assumeRoleCredentials.has(profile.label)) {
+      const credentialsFromCache = this.assumeRoleCredentials.get(
+        profile.label
+      )!!;
+
+      if (credentialsFromCache.expireTime > new Date()) {
+        return credentialsFromCache;
+      }
+    }
+
+    const sts = new AWS.STS({
+      accessKeyId: profile.accessKeyId,
+      secretAccessKey: profile.accessKeySecret,
+      region: profile.region
+    });
+
+    const response = await sts
+      .assumeRole({
+        RoleArn: profile.assumeRoleArn!!,
+        RoleSessionName: "GetSecrets"
+      })
+      .promise();
+
+    if (response.Credentials) {
+      const credentials = new AWS.Credentials({
+        accessKeyId: response.Credentials.AccessKeyId!!,
+        secretAccessKey: response.Credentials.SecretAccessKey!!,
+        sessionToken: response.Credentials.SessionToken
+      });
+      credentials.expireTime = response.Credentials.Expiration;
+
+      this.assumeRoleCredentials.set(profile.label, credentials);
+
+      return credentials;
+    } else {
+      return null;
+    }
   }
 
   async describeSecret(arn: string): Promise<DescribeSecretResponse | null> {
