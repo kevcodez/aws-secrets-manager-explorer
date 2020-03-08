@@ -26,7 +26,7 @@
     <p class="mt-6">
       Found a bug?
       <a
-        class="cursor-pointer text-blue-400"
+        class="cursor-pointer text-indigo-500"
         @click="
           openLink(
             'https://github.com/kevcodez/aws-secrets-manager-explorer/issues'

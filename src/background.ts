@@ -8,12 +8,6 @@ import {
 } from "vue-cli-plugin-electron-builder/lib";
 const isDevelopment = process.env.NODE_ENV !== "production";
 
-autoUpdater.setFeedURL({
-  provider: "github",
-  repo: "aws-secrets-manager-explorer",
-  owner: "kevcodez"
-});
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let win;
@@ -136,7 +130,7 @@ const template = [
       {
         label: "Check for Updates...",
         click: () => {
-          autoUpdater.checkForUpdates();
+          autoUpdater.checkForUpdatesAndNotify();
         }
       },
       { type: "separator" },

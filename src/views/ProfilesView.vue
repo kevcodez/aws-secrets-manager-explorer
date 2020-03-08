@@ -3,7 +3,7 @@
     <nav class="container">
       <ol class="list-reset py-4 rounded flex bg-grey-light text-grey">
         <li class="px-2">
-          <router-link to="/" class="no-underline text-indigo"
+          <router-link to="/" class="no-underline text-indigo select-none"
             >&lt; Back to all secrets</router-link
           >
         </li>
@@ -27,22 +27,27 @@
             <div class="shadow-md bg-gray-100 h-full">
               <div
                 v-for="profile in profiles"
-                :key="profile.label"
+                :key="profile.id"
                 class="hover:bg-gray-200 p-2 cursor-pointer"
                 :class="{
-                  'font-bold text-purple-700':
-                    selectedProfile && selectedProfile.label === profile.label
+                  'font-bold text-indigo-700':
+                    selectedProfile && selectedProfile.id === profile.id
                 }"
                 @click="selectProfile(profile)"
               >
                 {{ profile.label }}
+                <span
+                  v-if="activeProfile && activeProfile.id === profile.id"
+                  class="font-bold text-sm"
+                  >&nbsp;(Active)</span
+                >
               </div>
             </div>
           </div>
           <div class="w-3/4">
             <div class="w-full pr-4 pl-2">
               <div
-                class="flex items-center rounded bg-purple-500 text-white text-sm px-4 py-3 mb-4"
+                class="flex items-center rounded bg-indigo-500 text-white text-sm px-4 py-3 mb-4"
                 role="alert"
               >
                 <svg
@@ -58,6 +63,13 @@
                   The data will only be saved
                   <strong>locally.</strong>
                 </p>
+              </div>
+
+              <div class="text-xl font-medium mb-2">
+                <span v-if="selectedProfile"
+                  >Editing profile {{ selectedProfile.label }}</span
+                >
+                <span v-else>Adding new profile</span>
               </div>
 
               <div class="flex flex-wrap h-full">
@@ -162,7 +174,7 @@
 
               <button
                 type="submit"
-                class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded self-end align-middle float-right"
+                class="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded self-end align-middle float-right"
               >
                 Save
               </button>
@@ -178,9 +190,14 @@
 import { Component, Vue } from "vue-property-decorator";
 import { Profile } from "@/profiles/Profile";
 import { profilesService } from "@/profiles/ProfilesService";
-import { ValidationProvider, ValidationObserver } from "vee-validate";
+import {
+  setInteractionMode,
+  extend,
+  ValidationProvider,
+  ValidationObserver
+} from "vee-validate";
 import { required } from "vee-validate/dist/rules";
-import { extend } from "vee-validate";
+import { v4 as uuidv4 } from "uuid";
 
 @Component({
   components: {
@@ -195,19 +212,33 @@ export default class ProfilesView extends Vue {
   accessKeyId = "";
   assumeRoleArn = "";
 
-  profiles: Profile[] = [];
+  profiles: Profile[] = profilesService.getProfiles();
+  activeProfile: Profile | null = profilesService.getActiveProfile();
   selectedProfile: Profile | null = null;
 
-  deleteProfile() {
-    this.profiles = this.profiles.filter(
-      it => it.label !== this.selectedProfile?.label
-    );
+  get regions(): Map<string, string> {
+    return new Map<string, string>([
+      ["us-east-1", "US East (North-Viginia)"],
+      ["us-east-1", "US East (Ohio)"]
+    ]);
+  }
 
-    profilesService.saveProfiles(this.profiles);
+  deleteProfile() {
+    profilesService.deleteProfile(this.selectedProfile!!);
+    this.profiles = profilesService.getProfiles();
+    this.activeProfile = profilesService.getActiveProfile();
+
+    this.selectedProfile = null;
+    this.label = "";
+    this.region = "";
+    this.accessKeySecret = "";
+    this.accessKeyId = "";
+    this.assumeRoleArn = "";
   }
 
   save() {
     const profile: Profile = {
+      id: this.selectedProfile?.id || uuidv4(),
       label: this.label,
       region: this.region,
       accessKeyId: this.accessKeyId,
@@ -215,11 +246,10 @@ export default class ProfilesView extends Vue {
       assumeRoleArn: this.assumeRoleArn
     };
 
-    this.profiles.push(profile);
-
+    profilesService.addProfile(profile);
     this.selectedProfile = profile;
-
-    profilesService.saveProfiles(this.profiles);
+    this.profiles = profilesService.getProfiles();
+    this.activeProfile = profilesService.getActiveProfile();
   }
 
   selectProfile(profile) {
@@ -234,7 +264,7 @@ export default class ProfilesView extends Vue {
 
   mounted() {
     extend("required", required);
-    this.profiles = profilesService.getProfiles();
+    setInteractionMode("eager");
   }
 }
 </script>

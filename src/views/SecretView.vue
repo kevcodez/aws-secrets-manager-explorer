@@ -1,9 +1,11 @@
 <template>
   <div class="mx-4">
     <nav class="container">
-      <ol class="list-reset py-4 rounded flex bg-grey-light text-grey">
+      <ol class="list-reset py-4 rounded flex bg-grey-light text-sm text-grey">
         <li class="px-2">
-          <router-link to="/" class="no-underline text-indigo"
+          <router-link
+            to="/"
+            class="no-underline text-indigo  text-center align-middle"
             >All secrets</router-link
           >
         </li>
@@ -20,103 +22,134 @@
     </nav>
 
     <div v-if="secretValueResult && describeSecretResult">
-      <div class="shadow-md rounded w-full mb-5 p-4">
-        <div class="font-bold text-xl mb-2">
+      <div class="shadow rounded rounded w-full mb-4">
+        <div
+          class="font-bold text-lg mb-2 border-b-2 border-gray-200 py-3 px-4"
+        >
           <font-awesome-icon icon="info-circle" />&nbsp;Info
-        </div>
-        <div class="mb-4">
-          <span class="rounded-full bg-gray-200 px-3 py-1">Name</span>
-          <p class="mt-2 pl-2">
-            {{ secretValueResult.Name }}
-            <font-awesome-icon
-              class="float-right"
-              icon="clipboard"
-              @click="copyToClipboard(secretValueResult.Name)"
-            />
-          </p>
-        </div>
-        <div class="mb-4">
-          <span class="rounded-full bg-gray-200 px-3 py-1">ARN</span>
-          <p class="mt-2 pl-2">
-            {{ secretValueResult.ARN }}
-            <font-awesome-icon
-              class="float-right"
-              icon="clipboard"
-              @click="copyToClipboard(secretValueResult.ARN)"
-            />
-          </p>
-        </div>
 
-        <div class="mb-4">
-          <span class="rounded-full bg-gray-200 px-3 py-1">Description</span>
-          <p class="mt-2 pl-2">
-            {{ describeSecretResult.Description || " - " }}
-          </p>
+          <font-awesome-icon
+            icon="sync-alt"
+            class="float-right cursor-pointer hover:text-indigo-500 text-lg"
+            @click="refreshSecret()"
+          />
         </div>
-
-        <div class="flex">
-          <div class="w-1/2">
-            <span class="rounded-full bg-gray-200 px-3 py-1">Created Date</span>
-            <p class="mt-2 pl-2">
-              {{ secretValueResult.CreatedDate | dayjs("YYYY-MM-DD HH:mm:ss") }}
+        <div class="p-4">
+          <div class="mb-4">
+            <span class="rounded-full bg-gray-600 text-white px-3 text-sm py-1"
+              >Name</span
+            >
+            <p class="mt-2 pl-1">
+              {{ secretValueResult.Name }}
+              <font-awesome-icon
+                class="float-right hover:text-indigo-500 cursor-pointer"
+                icon="clipboard"
+                @click="copyToClipboard(secretValueResult.Name)"
+              />
+            </p>
+          </div>
+          <div class="mb-4">
+            <span class="rounded-full bg-gray-600 text-white px-3 py-1 text-sm"
+              >ARN</span
+            >
+            <p class="mt-2 pl-1">
+              {{ secretValueResult.ARN }}
+              <font-awesome-icon
+                class="float-right hover:text-indigo-500 cursor-pointer"
+                icon="clipboard"
+                @click="copyToClipboard(secretValueResult.ARN)"
+              />
             </p>
           </div>
 
-          <div class="w-1/2">
-            <span class="rounded-full bg-gray-200 px-3 py-1"
-              >Last Changed Date</span
+          <div class="mb-4">
+            <span class="rounded-full bg-gray-600 text-white px-3 py-1 text-sm"
+              >Description</span
             >
-            <p class="mt-2 pl-2">
-              {{
-                describeSecretResult.LastChangedDate
-                  | dayjs("YYYY-MM-DD HH:mm:ss")
-              }}
+            <p class="mt-2 pl-1">
+              {{ describeSecretResult.Description || " - " }}
             </p>
+          </div>
+
+          <div class="flex">
+            <div class="w-1/2">
+              <span
+                class="rounded-full bg-gray-600 text-white px-3 py-1 text-sm"
+                >Created Date</span
+              >
+              <p class="mt-2 pl-1">
+                {{
+                  secretValueResult.CreatedDate | dayjs("YYYY-MM-DD HH:mm:ss")
+                }}
+              </p>
+            </div>
+
+            <div class="w-1/2">
+              <span
+                class="rounded-full bg-gray-600 text-white px-3 py-1 text-sm"
+                >Last Changed Date</span
+              >
+              <p class="mt-2 pl-1">
+                {{
+                  describeSecretResult.LastChangedDate
+                    | dayjs("YYYY-MM-DD HH:mm:ss")
+                }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-      <div class="shadow-md rounded w-full p-4">
-        <div class="font-bold text-xl mb-2">
+
+      <div class="shadow rounded w-full">
+        <div
+          class="font-bold text-lg mb-2 rounded border-b-2 border-gray-200 py-3 px-4"
+        >
           <font-awesome-icon icon="key" />&nbsp;Secret Value
           <font-awesome-icon
             icon="star"
-            class="float-right cursor-pointer text-orange-400 text-xl"
+            class="float-right cursor-pointer text-yellow-500 text-lg"
             v-if="favorite"
             @click="removeFromFavorites()"
           />
           <font-awesome-icon
             :icon="['far', 'star']"
-            class="float-right cursor-pointer text-xl"
+            class="float-right cursor-pointer text-lg hover:text-indigo-500"
             @click="markAsFavorite()"
             v-else
           />
         </div>
 
-        <div v-if="jsonSecret">
-          <div
-            class="border-b-2 border-gray-100 py-4"
-            v-for="key in Object.keys(jsonSecret)"
-            :key="key"
-          >
-            <span class="rounded-full bg-gray-200 px-3 py-1">{{ key }}</span>
-            <font-awesome-icon
-              class="float-right"
-              icon="clipboard"
-              @click="copyToClipboard(jsonSecret[key])"
-            />
-            <p class="mt-2 px-2 break-words">{{ jsonSecret[key] }}</p>
+        <div>
+          <div v-if="jsonSecret">
+            <div
+              class="border-b-2 border-gray-100 p-4"
+              v-for="key in Object.keys(jsonSecret)"
+              :key="key"
+            >
+              <span
+                class="rounded-full bg-indigo-500 text-white px-3 py-1 text-sm"
+              >
+                {{ key }}
+              </span>
+              <font-awesome-icon
+                class="float-right hover:text-indigo-500 cursor-pointer"
+                icon="clipboard"
+                @click="copyToClipboard(jsonSecret[key])"
+              />
+              <p class="mt-2 px-2 break-words">{{ jsonSecret[key] }}</p>
+            </div>
           </div>
-        </div>
 
-        <div v-else>
-          <p class="break-words">
-            {{ secretValueResult.SecretString }}
-            <font-awesome-icon
-              class="float-right"
-              icon="clipboard"
-              @click="secretValueResult.SecretString"
-            />
-          </p>
+          <div v-else>
+            <p class="break-words">
+              {{ secretValueResult.SecretString }}
+              <font-awesome-icon
+                class="float-right hover:text-indigo-500 cursor-pointer"
+                icon="clipboard"
+                @click="secretValueResult.SecretString"
+              />
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -124,10 +157,6 @@
     <div v-if="error" class="shadow-md rounded w-full mb-5 p-4">
       An error occured loading the secret.
       <p class="mt-4">{{ error }}</p>
-    </div>
-
-    <div v-else-if="loadingSecret" class="shadow-md rounded w-full mb-5 p-4">
-      Loading ...
     </div>
   </div>
 </template>
@@ -159,12 +188,20 @@ export default class SecretView extends Vue {
     clipboard.writeText(text);
     this.$toasted.show("Copied to clipboard!", {
       type: "success",
+      theme: "bubble",
       duration: 1000,
       position: "top-center"
     });
   }
 
+  refreshSecret() {
+    // @ts-ignore
+    this.loadSecret(this.$route.params.arn);
+  }
+
   async loadSecret(arn: string) {
+    if (this.loadingSecret) return;
+
     this.error = null;
     this.loadingSecret = true;
 

@@ -5,14 +5,14 @@
         <li>
           <a
             disabled
-            class="flex rounded-full bg-indigo-500 uppercase px-2 py-1 text-xs font-bold mr-3 text-white"
+            class="flex rounded-full bg-indigo-500 px-2 py-1 text-white text-sm"
             >All secrets</a
           >
         </li>
       </ol>
     </nav>
 
-    <form class="w-full" style="top: 40px">
+    <form class="w-full" style="top: 40px" v-if="!error">
       <div class="flex flex-wrap">
         <div class="w-full">
           <label
@@ -22,7 +22,7 @@
           >
           <input
             v-on:input="filterSecrets()"
-            :disabled="loading"
+            :disabled="loading || !activeProfile"
             v-model="searchTerm"
             class="appearance-none block w-full bg-gray-200 text-gray-700 border border-gray-200 rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
             id="search"
@@ -33,7 +33,12 @@
       </div>
     </form>
 
-    <table class="w-full">
+    <div v-if="error" class="shadow-md rounded w-full mb-5 p-4">
+      An error occured loading the secret.
+      <p class="mt-4">{{ error }}</p>
+    </div>
+
+    <table class="w-full" v-if="activeProfile && !error">
       <thead class="flex w-full">
         <tr class="flex w-full">
           <th
@@ -49,7 +54,8 @@
           <th class="w-1/12 py-3 border-b border-gray-200">
             <font-awesome-icon
               icon="sync-alt"
-              class="text-xl float-right mr-2 cursor-pointer"
+              class="text-xl float-right mr-6 cursor-pointer hover:text-indigo-500"
+              v-if="activeProfile"
               @click="loadSecrets(true)"
             />
           </th>
@@ -57,7 +63,7 @@
       </thead>
       <tbody
         class="flex flex-col items-center justify-between overflow-y-scroll w-full"
-        style="height: 75vh;"
+        style="height: 70vh;"
         v-if="!loading"
       >
         <tr
@@ -75,13 +81,23 @@
           <td class="w-1/12 p-2 border-b border-gray-200">
             <font-awesome-icon
               icon="star"
-              class="float-right cursor-pointer text-orange-400"
+              class="float-right mr- cursor-pointer text-yellow-500"
               v-if="isFavorite(secret)"
             />
           </td>
         </tr>
       </tbody>
     </table>
+
+    <div v-if="!activeProfile" class="mt-5">
+      You haven't selected a profile. In case you have not configured one yet,
+      please
+      <router-link
+        to="/profiles"
+        class="text-indigo-500 font-bold cursor-pointer"
+        >create one here</router-link
+      >.
+    </div>
   </div>
 </template>
 
@@ -92,7 +108,11 @@ import { secretService } from "@/SecretService";
 import store from "@/store";
 import { favoriteService } from "@/favorites/FavoriteService";
 import { AWSError } from "aws-sdk";
-import { SETTINGS_KEY_ACTIVE_PROFILE } from "@/profiles/ProfilesService";
+import {
+  SETTINGS_KEY_ACTIVE_PROFILE,
+  profilesService
+} from "@/profiles/ProfilesService";
+import { Profile } from "../profiles/Profile";
 
 @Component({})
 export default class SecretListView extends Vue {
@@ -102,17 +122,21 @@ export default class SecretListView extends Vue {
   loading = false;
   error: AWSError | null = null;
   unsubribeWatcher: any = null;
+  activeProfile: Profile | null = null;
 
   isFavorite(secret: SecretListEntry): boolean {
     return favoriteService.isFavorite(secret.Name!!);
   }
 
   mounted() {
+    this.activeProfile = profilesService.getActiveProfile();
     this.loadSecrets();
 
     this.unsubribeWatcher = store.onDidChange(
       SETTINGS_KEY_ACTIVE_PROFILE,
-      () => {
+      newVal => {
+        this.activeProfile = newVal;
+
         this.loadSecrets();
       }
     );

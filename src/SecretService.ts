@@ -43,10 +43,8 @@ class SecretService {
   private async getCredentialsWithAssumeRole(
     profile: Profile
   ): Promise<AWS.Credentials | null> {
-    if (this.assumeRoleCredentials.has(profile.label)) {
-      const credentialsFromCache = this.assumeRoleCredentials.get(
-        profile.label
-      )!!;
+    if (this.assumeRoleCredentials.has(profile.id)) {
+      const credentialsFromCache = this.assumeRoleCredentials.get(profile.id)!!;
 
       if (credentialsFromCache.expireTime > new Date()) {
         return credentialsFromCache;
@@ -74,7 +72,7 @@ class SecretService {
       });
       credentials.expireTime = response.Credentials.Expiration;
 
-      this.assumeRoleCredentials.set(profile.label, credentials);
+      this.assumeRoleCredentials.set(profile.id, credentials);
 
       return credentials;
     } else {
@@ -108,8 +106,8 @@ class SecretService {
       return [];
     }
 
-    if (this.secrets.has(activeProfile.label) && !forceRefresh) {
-      return this.secrets.get(activeProfile.label)!!;
+    if (this.secrets.has(activeProfile.id) && !forceRefresh) {
+      return this.secrets.get(activeProfile.id)!!;
     }
 
     const secretsManager = await this.getSecretsManager();
@@ -140,7 +138,7 @@ class SecretService {
       }
     } while (hasMore);
 
-    this.secrets.set(activeProfile.label, secretEntries);
+    this.secrets.set(activeProfile.id, secretEntries);
 
     return secretEntries;
   }
