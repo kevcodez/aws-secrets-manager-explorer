@@ -78,6 +78,18 @@
       <div class="shadow-md rounded w-full p-4">
         <div class="font-bold text-xl mb-2">
           <font-awesome-icon icon="key" />&nbsp;Secret Value
+          <font-awesome-icon
+            icon="star"
+            class="float-right cursor-pointer text-orange-400 text-xl"
+            v-if="favorite"
+            @click="removeFromFavorites()"
+          />
+          <font-awesome-icon
+            :icon="['far', 'star']"
+            class="float-right cursor-pointer text-xl"
+            @click="markAsFavorite()"
+            v-else
+          />
         </div>
 
         <div v-if="jsonSecret">
@@ -122,19 +134,25 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import AWS from "aws-sdk";
 import { getSecretsManager } from "../aws-helper";
 const { clipboard } = require("electron");
 import store from "@/store";
+import { favoriteService } from "@/favorites/FavoriteService";
+import {
+  DescribeSecretResponse,
+  GetSecretValueResponse
+} from "aws-sdk/clients/secretsmanager";
+import { AWSError } from "aws-sdk";
 
 @Component({})
 export default class SecretsList extends Vue {
-  describeSecretResult: any = null;
-  secretValueResult: any = null;
-  jsonSecret: any = null;
+  describeSecretResult: DescribeSecretResponse | null = null;
+  secretValueResult: GetSecretValueResponse | null = null;
+  jsonSecret: Record<string, any> | null = null;
   loadingSecret = false;
-  error: any = null;
+  error: AWSError | null = null;
   unsubribeWatcher: any = null;
+  favorite = false;
 
   copyToClipboard(text) {
     clipboard.writeText(text);
@@ -167,6 +185,10 @@ export default class SecretsList extends Vue {
         })
         .promise();
 
+      if (describeSecretResult.Name) {
+        this.favorite = favoriteService.isFavorite(describeSecretResult.Name);
+      }
+
       const secretString = secretValueResult.SecretString as string;
 
       try {
@@ -183,42 +205,52 @@ export default class SecretsList extends Vue {
     this.loadingSecret = false;
   }
 
+  markAsFavorite() {
+    if (this.describeSecretResult?.Name) {
+      favoriteService.markAsFavorite(this.describeSecretResult.Name);
+      this.favorite = true;
+    }
+  }
+
+  removeFromFavorites() {
+    if (this.describeSecretResult?.Name) {
+      favoriteService.removeFromFavorites(this.describeSecretResult.Name);
+
+      this.favorite = false;
+    }
+  }
+
   mounted() {
     // @ts-ignore
     const arn = this.$route.params.arn;
 
     this.loadSecret(arn);
 
-    const self = this;
+    this.unsubribeWatcher = store.onDidChange("activeProfile", async () => {
+      this.loadingSecret = true;
 
-    this.unsubribeWatcher = store.onDidChange(
-      "activeProfile",
-      async (newVal, oldVal) => {
-        self.loadingSecret = true;
+      // ARN will change, so we need to find the new ARN
+      const secretsManager = await getSecretsManager();
+      const secretsResponse = await secretsManager
+        ?.listSecrets({
+          MaxResults: 100
+        })
+        .promise();
 
-        // ARN will change, so we need to find the new ARN
-        const secretsManager = await getSecretsManager();
-        const secretsResponse = await secretsManager
-          ?.listSecrets({
-            MaxResults: 100
-          })
-          .promise();
-
-        const matchingSecrets = secretsResponse?.SecretList!!.filter(
+      const matchingSecrets =
+        secretsResponse?.SecretList?.filter(
           it => it.Name === this.secretValueResult?.Name
-        );
+        ) ?? [];
 
-        if (matchingSecrets?.length) {
-          const arn = matchingSecrets[0].ARN!!;
+      if (matchingSecrets.length) {
+        const arn = matchingSecrets[0]!!.ARN!!;
 
-          // @ts-ignore
-          self.loadSecret(arn);
-        } else {
-          // @ts-ignore
-          // self.$router.push('/')
-        }
+        this.loadSecret(arn);
+      } else {
+        // @ts-ignore
+        // self.$router.push('/')
       }
-    );
+    });
   }
 
   beforeDestroy() {

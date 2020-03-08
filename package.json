@@ -14,6 +14,7 @@
   "main": "background.js",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.27",
+    "@fortawesome/free-regular-svg-icons": "^5.12.1",
     "@fortawesome/free-solid-svg-icons": "^5.12.1",
     "@fortawesome/vue-fontawesome": "^0.1.9",
     "about-window": "^1.13.2",
@@ -22,7 +23,7 @@
     "core-js": "^3.6.4",
     "dayjs": "^1.8.21",
     "electron-store": "^5.1.1",
-    "electron-updater": "^2.2.4",
+    "electron-updater": "^4.2.4",
     "tailwindcss": "^1.2.0",
     "vee-validate": "^3.2.5",
     "vue": "^2.6.11",
@@ -32,16 +33,8 @@
     "vue-toasted": "^1.1.27",
     "vuex-class": "^0.3.2"
   },
-  "author": {
-    "name": "Kevin Grüneberg",
-    "url": "https://kevcodez.de"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/kevcodez/aws-secrets-manager-explorer.git"
-  },
-  "homepage": "https://github.com/kevcodez/aws-secrets-manager-explorer",
   "devDependencies": {
+    "@types/node": "^12.12.13",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
     "@vue/cli-plugin-babel": "~4.2.0",
@@ -84,12 +77,22 @@
       "@typescript-eslint/no-var-requires": "off",
       "@typescript-eslint/ban-ts-ignore": "off",
       "@typescript-eslint/camelcase": "off",
-      "@typescript-eslint/no-explicit-any": "off"
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-non-null-assertion": "off"
     }
   },
-  "license": "MIT",
   "browserslist": [
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "author": {
+    "name": "Kevin Grüneberg",
+    "url": "https://kevcodez.de"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kevcodez/aws-secrets-manager-explorer.git"
+  },
+  "homepage": "https://github.com/kevcodez/aws-secrets-manager-explorer",
+  "license": "MIT"
 }

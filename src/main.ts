@@ -6,10 +6,12 @@ import {
   faClipboard,
   faKey,
   faInfoCircle,
+  faSyncAlt,
   faPlus,
   faTrash,
   faStar
 } from "@fortawesome/free-solid-svg-icons";
+import { faStar as starRegular } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import dayjs from "dayjs";
 import Toasted from "vue-toasted";
@@ -18,7 +20,16 @@ import Empty from "@/layout/Empty.vue";
 
 Vue.use(Toasted);
 
-library.add(faClipboard, faKey, faInfoCircle, faStar, faPlus, faTrash);
+library.add(
+  faClipboard,
+  faKey,
+  faInfoCircle,
+  faStar,
+  starRegular,
+  faPlus,
+  faTrash,
+  faSyncAlt
+);
 
 Vue.component("font-awesome-icon", FontAwesomeIcon);
 Vue.component("font-awesome-icon", FontAwesomeIcon);

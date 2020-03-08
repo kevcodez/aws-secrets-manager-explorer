@@ -37,20 +37,28 @@
       <thead class="flex w-full">
         <tr class="flex w-full">
           <th
-            class="w-1/3 py-3 text-left border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider"
+            class="w-5/12 py-3 text-left border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider"
           >
             Secret
           </th>
           <th
-            class="w-2/3 py-3 text-left border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider"
+            class="w-6/12 py-3 text-left border-b border-gray-200 bg-gray-50 text-left text-xs leading-4 font-medium text-gray-800 uppercase tracking-wider"
           >
             Description
+          </th>
+          <th class="w-1/12 py-3 border-b border-gray-200">
+            <font-awesome-icon
+              icon="sync-alt"
+              class="text-xl float-right mr-2 cursor-pointer"
+              @click="loadSecrets()"
+            />
           </th>
         </tr>
       </thead>
       <tbody
-        class=" flex flex-col items-center justify-between overflow-y-scroll w-full"
+        class="flex flex-col items-center justify-between overflow-y-scroll w-full"
         style="height: 75vh;"
+        v-if="!loading"
       >
         <tr
           v-for="secret in filteredSecrets"
@@ -58,11 +66,18 @@
           :key="secret.arn"
           @click="selectSecret(secret)"
         >
-          <td class="w-1/3 py-2 px-2 border-b border-gray-200">
+          <td class="w-5/12 py-2 px-2 border-b border-gray-200">
             {{ secret.Name }}
           </td>
-          <td class="w-2/3 py-2 px-2 border-b border-gray-200">
+          <td class="w-6/12 py-2 px-2 border-b border-gray-200">
             {{ secret.Description || " - " }}
+          </td>
+          <td class="w-1/12 p-2 border-b border-gray-200">
+            <font-awesome-icon
+              icon="star"
+              class="float-right cursor-pointer text-orange-400"
+              v-if="isFavorite(secret)"
+            />
           </td>
         </tr>
       </tbody>
@@ -74,9 +89,9 @@
 import { Component, Vue } from "vue-property-decorator";
 // eslint-disable-next-line no-unused-vars
 import { SecretListEntry } from "aws-sdk/clients/secretsmanager";
-import AWS from "aws-sdk";
 import { getSecretsManager } from "../aws-helper";
 import store from "@/store";
+import { favoriteService } from "@/favorites/FavoriteService";
 
 @Component({})
 export default class SecretsList extends Vue {
@@ -85,6 +100,10 @@ export default class SecretsList extends Vue {
   searchTerm = "";
   loading = false;
   unsubribeWatcher: any = null;
+
+  isFavorite(secret: SecretListEntry): boolean {
+    return favoriteService.isFavorite(secret.Name!!);
+  }
 
   mounted() {
     this.loadSecrets();
@@ -100,6 +119,8 @@ export default class SecretsList extends Vue {
   }
 
   async loadSecrets() {
+    if (this.loading) return;
+
     const secretsManager = await getSecretsManager();
     if (!secretsManager) {
       return;
@@ -120,20 +141,28 @@ export default class SecretsList extends Vue {
   }
 
   filterSecrets() {
+    const favorites = favoriteService.getFavorites();
+
+    let filteredSecrets;
+
     if (!this.searchTerm) {
-      this.filteredSecrets = this.secrets.sort(
-        (a: SecretListEntry, b: SecretListEntry) =>
-          a.Name!!.localeCompare(b.Name!!)
-      );
+      filteredSecrets = this.secrets.concat();
     } else {
-      this.filteredSecrets = this.secrets
-        .filter(it => {
-          return it.Name?.includes(this.searchTerm);
-        })
-        .sort((a: SecretListEntry, b: SecretListEntry) =>
+      filteredSecrets = this.secrets.filter(it => {
+        return it.Name?.includes(this.searchTerm);
+      });
+    }
+
+    this.filteredSecrets = filteredSecrets.sort(
+      (a: SecretListEntry, b: SecretListEntry) => {
+        const favoriteA: boolean = favorites.includes(a.Name!!);
+        const favoriteB: boolean = favorites.includes(b.Name!!);
+        return (
+          (favoriteA === favoriteB ? 0 : favoriteA ? -1 : 1) ||
           a.Name!!.localeCompare(b.Name!!)
         );
-    }
+      }
+    );
   }
 
   selectSecret(secret) {

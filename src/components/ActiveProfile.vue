@@ -1,6 +1,6 @@
 <template>
   <div class="mx-5">
-    <div class="dropdown inline-block relative float-right">
+    <div class="dropdown inline-block relative float-right select-none">
       <button
         class="bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center"
       >
