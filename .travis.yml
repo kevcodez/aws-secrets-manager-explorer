@@ -17,13 +17,7 @@ cache:
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
 
-script: yarn install
-
-deploy:
-  provider: script
-  script: bash deploy.travis.sh
-  on:
-    brach: master
+script: yarn release
 
 before_cache:
   - rm -rf $HOME/.cache/electron-builder/wine
