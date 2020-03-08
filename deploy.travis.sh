@@ -1,2 +1,2 @@
 #! /bin/bash
-yarn release
+yarn install && yarn release

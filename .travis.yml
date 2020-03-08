@@ -17,7 +17,7 @@ cache:
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
 
-script: yarn test
+script: yarn install
 
 deploy:
   provider: script
