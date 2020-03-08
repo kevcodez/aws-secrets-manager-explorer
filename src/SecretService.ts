@@ -119,10 +119,12 @@ class SecretService {
     let hasMore = true;
     let nextToken;
 
+    const maxResults = 100;
+
     do {
       const result = await secretsManager
         .listSecrets({
-          MaxResults: 100,
+          MaxResults: maxResults,
           NextToken: nextToken
         })
         .promise();
@@ -131,7 +133,8 @@ class SecretService {
         secretEntries.push(...result.SecretList);
         nextToken = result.NextToken;
         hasMore =
-          result.SecretList.length === 100 && result.NextToken !== undefined;
+          result.SecretList.length === maxResults &&
+          result.NextToken !== undefined;
       } else {
         hasMore = false;
       }
