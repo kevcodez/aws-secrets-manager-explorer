@@ -14,7 +14,6 @@ matrix:
 cache:
   yarn: true
   directories:
-    - node_modules
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
 
@@ -24,7 +23,7 @@ deploy:
   provider: script
   script: bash deploy.travis.sh
   on:
-    tags: true
+    brach: master
 
 before_cache:
   - rm -rf $HOME/.cache/electron-builder/wine

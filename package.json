@@ -4,14 +4,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "electron:serve": "vue-cli-service electron:serve",
-    "postinstall": "electron-builder install-app-deps",
-    "postuninstall": "electron-builder install-app-deps",
-    "release": "vue-cli-service electron:build",
-    "test": "vue-cli-service electron:build --publish never"
+    "electron:serve": "./node_modules/.bin/vue-cli-service electron:serve",
+    "postinstall": "./node_modules/.bin/electron-builder install-app-deps",
+    "postuninstall": "./node_modules/.bin/electron-builder install-app-deps",
+    "release": "./node_modules/.bin/vue-clivue-cli-service electron:build",
+    "test": "./node_modules/.bin/vue-cli-service electron:build --publish never"
   },
   "main": "background.js",
   "dependencies": {
