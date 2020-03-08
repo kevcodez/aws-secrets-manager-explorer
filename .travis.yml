@@ -12,16 +12,17 @@ matrix:
         node_js: "12"
   
 cache:
+  yarn: true
   directories:
-    - $HOME/.cache/yarn
+    - node_modules
     - $HOME/.cache/electron
     - $HOME/.cache/electron-builder
 
-script: yarn build
+script: yarn test
 
 deploy:
   provider: script
-  script: yarn release
+  script: bash deploy.travis.sh
   on:
     tags: true
 
