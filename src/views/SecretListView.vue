@@ -62,7 +62,7 @@
         </tr>
       </thead>
       <tbody
-        class="flex flex-col items-center justify-between overflow-y-scroll w-full"
+        class="flex flex-col items-center overflow-y-scroll w-full"
         style="height: 70vh;"
         v-if="!loading"
       >
