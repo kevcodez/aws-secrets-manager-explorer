@@ -1,8 +1,10 @@
 <template>
   <div>
-    <nav class="container">
-      <ol class="list-reset py-4 rounded flex bg-grey-light text-grey">
-        <li class="px-2">
+    <nav class="mb-2">
+      <ol
+        class="list-reset pl-6 py-4 rounded text-sm flex bg-grey-light text-grey"
+      >
+        <li>
           <router-link to="/" class="no-underline text-indigo select-none"
             >&lt; Back to all secrets</router-link
           >
@@ -248,7 +250,7 @@ export default class ProfilesView extends Vue {
       assumeRoleArn: this.assumeRoleArn
     };
 
-    profilesService.addProfile(profile);
+    profilesService.saveOrUpdateProfile(profile);
     this.selectedProfile = profile;
     this.profiles = profilesService.getProfiles();
     this.activeProfile = profilesService.getActiveProfile();

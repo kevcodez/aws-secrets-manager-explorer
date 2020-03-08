@@ -23,8 +23,15 @@ class ProfilesService {
     this.saveProfiles();
   }
 
-  addProfile(profile: Profile) {
-    this.profiles.push(profile);
+  saveOrUpdateProfile(profile: Profile) {
+    const isExistingProfile = this.profiles.some(it => it.id === profile.id);
+    if (isExistingProfile) {
+      const index = this.profiles.findIndex(it => it.id === profile.id);
+      this.profiles[index] = profile;
+    } else {
+      this.profiles.push(profile);
+    }
+
     this.saveProfiles();
 
     // set as active profile if it's the first one being added
